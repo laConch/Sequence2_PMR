@@ -1,4 +1,4 @@
-package com.centralelille.sequence1.adapters;
+package com.centralelille.sequence1.adapters
 
 import android.util.Log
 import android.view.LayoutInflater

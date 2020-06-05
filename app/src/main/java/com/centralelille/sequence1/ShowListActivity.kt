@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.centralelille.sequence1.adapters.TaskAdapter
 import com.centralelille.sequence1.data.ItemToDo
 import com.centralelille.sequence1.data.ListeToDo
+import com.centralelille.sequence1.data.ProfilListeToDo
 import com.google.gson.Gson
 
 class ShowListActivity : AppCompatActivity(), View.OnClickListener, TaskAdapter.OnItemListener {
@@ -27,7 +28,7 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, TaskAdapter.
     private lateinit var refCheckBox: CheckBox
 
     private lateinit var prefs: SharedPreferences
-    private lateinit var prefsTasks: SharedPreferences
+    private lateinit var prefsListes: SharedPreferences
 
     private lateinit var pseudoRecu: String
     private lateinit var listeRecue: String
@@ -40,21 +41,18 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, TaskAdapter.
         val bundleData: Bundle = this.getIntent().getExtras()
 
         pseudoRecu = bundleData.getString("pseudo")
+        listeRecue = bundleData.getString("titre")
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        prefsTasks = getSharedPreferences("DATA", 0)
+        prefsListes = getSharedPreferences("DATA", 0)
 
         refOkBtn = findViewById(R.id.buttonNewItem)
         listOfTask = findViewById(R.id.listOfItem)
         refTxtNewItem = findViewById(R.id.editTextItem)
         refCheckBox = findViewById(R.id.checkBox)
 
-        //listeItemToDo = getItems(listeRecue)
-        val dataSet: MutableList<ItemToDo> = mutableListOf()
+        listeItemToDo = getItems(pseudoRecu, listeRecue)
 
-        repeat(listeItemToDo.size) {
-            dataSet.add(listeItemToDo[it])
-        }
-
+        adapter.showData(listeItemToDo)
         listOfTask.adapter = adapter
         listOfTask.layoutManager = LinearLayoutManager(this)
 
@@ -63,31 +61,31 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, TaskAdapter.
     }
 
     private fun getItems(pseudo: String, titreListe: String): ArrayList<ItemToDo> {
-
-        //val listeListeToDo: ArrayList<ListeToDo> = ChoixListActivity.getLists(pseudo)
-
-        val liste = prefsTasks.getString(titreListe, "New")
+        val profil: String = prefsListes.getString(pseudo, "New")
         val gson = Gson()
-        Log.i("testshowlistact", liste)
+        Log.i("testchoixlistact", pseudo)
 
-        var toReturn = listOf<ItemToDo>() as ArrayList<ItemToDo>
-        if (liste == "New") {
-            // On renvoie une erreur et une liste vide
-            Toast.makeText(this, "Création dans une liste inexistante", Toast.LENGTH_LONG).show()
-        } else {
-            val currentList: ListeToDo = gson.fromJson(liste, ListeToDo::class.java)
-            Log.i(
-                "testshowlistact",
-                "récupération items ancienne liste" + currentList.toString() + currentList.itemsToDo.toString()
-            )
-            toReturn = currentList.itemsToDo
+        val profilListeToDo: ProfilListeToDo = gson.fromJson(profil, ProfilListeToDo::class.java)
+        Log.i(
+            "testshowlistact",
+            "récupérations listes ancien profil " + profilListeToDo.toString() + profilListeToDo.listesToDo.toString()
+        )
+
+        return findList(profilListeToDo.listesToDo, titreListe)
+    }
+
+    private fun findList(liste: ArrayList<ListeToDo>, titreListe: String): ArrayList<ItemToDo> {
+        var toReturn: ArrayList<ItemToDo> = liste[0].itemsToDo
+        for (i in 0..liste.size) {
+            if (liste[i].equals(titreListe))
+                toReturn = liste[i].itemsToDo
         }
-        return(toReturn)
+        return toReturn
     }
 
     override fun onClick(v: View?) {
         val newItemDescription = refTxtNewItem.text.toString()
-        val liste: String = prefsTasks.getString(listeRecue, "New")
+        val liste: String? = prefsListes.getString(listeRecue, "New")
         val gson = Gson()
 
         val currentList: ListeToDo = gson.fromJson(liste, ListeToDo::class.java)
@@ -105,8 +103,8 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, TaskAdapter.
         }
         val newListeJSON: String = gson.toJson(currentList)
 
-        val editor: SharedPreferences.Editor = prefsTasks.edit()
-        //editor.clear()
+        val editor: SharedPreferences.Editor = prefsListes.edit()
+        editor.clear()
         editor.putString(listeRecue, newListeJSON)
         editor.apply()
     }

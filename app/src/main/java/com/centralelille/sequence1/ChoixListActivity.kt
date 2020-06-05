@@ -132,14 +132,14 @@ class ChoixListActivity : AppCompatActivity(), View.OnClickListener, ListeAdapte
     override fun onListClicked(liste: ListeToDo) {
         Log.d("ChoixListActivity", "onListClicked $liste")
         Toast.makeText(this, liste.titreListeToDo, Toast.LENGTH_LONG).show()
-
-
+        
         val titreListe = liste.titreListeToDo
-        val bundleTitre = Bundle()
-        bundleTitre.putString("titre", titreListe)
+        val bundleData = Bundle()
+        bundleData.putString("pseudo", pseudoRecu)
+        bundleData.putString("titre", titreListe)
 
         val afficherShowListActivity = Intent(this, ShowListActivity::class.java)
-        afficherShowListActivity.putExtras(bundleTitre)
+        afficherShowListActivity.putExtras(bundleData)
         startActivity(afficherShowListActivity)
     }
 }

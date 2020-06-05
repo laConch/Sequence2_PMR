@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         refEdtPseudo = findViewById(R.id.editPseudo)
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-
         refBtnOk.setOnClickListener(this)
         refEdtPseudo.setOnClickListener(this)
     }
