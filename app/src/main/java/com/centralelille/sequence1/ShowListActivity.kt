@@ -6,7 +6,6 @@ import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,7 +24,6 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, TaskAdapter.
     private lateinit var refOkBtn: Button
     private lateinit var refTxtNewItem: EditText
     private lateinit var listOfTask: RecyclerView
-    private lateinit var refCheckBox: CheckBox
 
     private lateinit var prefs: SharedPreferences
     private lateinit var prefsListes: SharedPreferences
@@ -48,7 +46,6 @@ class ShowListActivity : AppCompatActivity(), View.OnClickListener, TaskAdapter.
         refOkBtn = findViewById(R.id.buttonNewItem)
         listOfTask = findViewById(R.id.listOfItem)
         refTxtNewItem = findViewById(R.id.editTextItem)
-        refCheckBox = findViewById(R.id.checkBox)
 
         listeItemToDo = getItems(pseudoRecu, listeRecue)
 
