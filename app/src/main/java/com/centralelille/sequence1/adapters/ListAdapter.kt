@@ -14,7 +14,7 @@ import com.centralelille.sequence1.data.ListeToDo
  *
  * @property onListListener
  */
-class ListeAdapter(private val onListListener: OnListListener) :
+class ListAdapter(private val onListListener: OnListListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val dataSet: MutableList<ListeToDo> = mutableListOf()
@@ -26,6 +26,11 @@ class ListeAdapter(private val onListListener: OnListListener) :
         dataSet.clear()
         dataSet.addAll(newDataSet)
         // Should refresh the view
+        notifyDataSetChanged()
+    }
+
+    fun addList(newList: ListeToDo) {
+        dataSet.add(newList)
         notifyDataSetChanged()
     }
 
@@ -58,7 +63,7 @@ class ListeAdapter(private val onListListener: OnListListener) :
         }
 
         fun bind(list: ListeToDo) {
-            title.text = list.titreListeToDo
+            title.text = list.label
         }
     }
 

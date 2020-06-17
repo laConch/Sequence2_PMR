@@ -1,6 +1,18 @@
 package com.centralelille.sequence1.data
 
-import java.io.Serializable
+/**
+ * Represents an item and is created according to the Json
+ *
+ * @property id
+ * @property label
+ * @property url
+ * @property checked
+ */
+data class ItemToDo(var id: String, var label: String, var url: String, var checked: Boolean)
 
-data class ItemToDo(var description: String, var fait: Boolean) : Serializable {
-}
+/**
+ * Represents a list of items and is created according to the Json.
+ *
+ * @property itemsToDo
+ */
+data class ItemsResponse(val itemsToDo: MutableList<ItemToDo>)

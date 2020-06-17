@@ -1,9 +1,7 @@
 package com.centralelille.sequence1
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -12,12 +10,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.centralelille.sequence1.adapters.ListeAdapter
+import com.centralelille.sequence1.adapters.ListAdapter
+import com.centralelille.sequence1.data.DataProvider
 import com.centralelille.sequence1.data.ListeToDo
-import com.centralelille.sequence1.data.ProfilListeToDo
-import com.google.gson.Gson
+import kotlinx.coroutines.*
 
-class ChoixListActivity : AppCompatActivity(), View.OnClickListener, ListeAdapter.OnListListener {
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+class ChoixListActivity : AppCompatActivity(), View.OnClickListener, ListAdapter.OnListListener {
 
     private val adapter = newAdapter()
 
@@ -25,121 +24,76 @@ class ChoixListActivity : AppCompatActivity(), View.OnClickListener, ListeAdapte
     private lateinit var refTxtNewList: EditText
     private lateinit var refRecycler: RecyclerView
 
-    private lateinit var prefs: SharedPreferences
-    private lateinit var prefsListes: SharedPreferences
-
     private lateinit var pseudoRecu: String
-    private lateinit var listeListeToDo: ArrayList<ListeToDo>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choix_list)
 
-        val bundlePseudo: Bundle = this.getIntent().getExtras()
+        val bundlePseudo: Bundle = this.intent.extras
 
         pseudoRecu = bundlePseudo.getString("pseudo")
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        prefsListes = getSharedPreferences("DATA", 0)
 
         refOkBtn = findViewById(R.id.buttonNewList)
         refRecycler = findViewById(R.id.listOfList)
         refTxtNewList = findViewById(R.id.editText)
 
-        listeListeToDo = getLists(pseudoRecu)
-
-        adapter.showData(listeListeToDo)
         refRecycler.adapter = adapter
         refRecycler.layoutManager = LinearLayoutManager(this)
 
-        // Click listener associé au boutton pour créer les listes et les sauvergarder
+        // Click listener associated to the button to create and save the lists
         refOkBtn.setOnClickListener(this)
+
+        loadListsUser(refRecycler)
     }
 
-    //On crée une fonction qui accède à la liste des Liste si le pseudo est déjà enregistré
-    //et qui crée un nouveau Profil et le stock dans les préférences si le pseudo rentré n'a jamais ete utilisé
+    /* By default included in the Main thread */
+    private val activityScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Main
+    )
 
-    fun getLists(pseudo: String): ArrayList<ListeToDo> {
-        val profil: String = prefsListes.getString(pseudo, "New")
-        val gson = Gson()
-        Log.i("testchoixlistact", pseudo)
-
-        if (profil == "New") {
-            //On crée un nouvel objet ProfilListeToDo qu'on stocke sous format JSON dans les préférences sous son pseudo
-            val newProfil = ProfilListeToDo(pseudo)
-            val newProfilJSON: String = gson.toJson(newProfil)
-            Log.i("testchoixlistact", "création d'un nouveau profil")
-
-            val editor: SharedPreferences.Editor = prefsListes.edit()
-            editor.clear()
-            editor.putString(pseudo, newProfilJSON)
-            editor.apply()
-
-            return newProfil.listesToDo
-        } else {
-            val profilListeToDo: ProfilListeToDo =
-                gson.fromJson(profil, ProfilListeToDo::class.java)
-            Log.i(
-                "testchoixlistact",
-                "récupérations listes ancien profil " + profilListeToDo.toString() + profilListeToDo.listesToDo.toString()
-            )
-            return (profilListeToDo.listesToDo)
-
+    private fun loadListsUser(list: RecyclerView) {
+        activityScope.launch(Dispatchers.Main) {
+            val listeListeToDo = DataProvider.getListUser(pseudoRecu)
+            adapter.showData(listeListeToDo)
         }
     }
 
     override fun onClick(v: View?) {
         val newListTitle = refTxtNewList.text.toString()
-        val profil: String = prefsListes.getString(pseudoRecu, "New")
-        val gson = Gson()
 
-        val profilListeToDo: ProfilListeToDo = gson.fromJson(profil, ProfilListeToDo::class.java)
-
-        when (v?.id) {
-            R.id.buttonNewList -> {
-                alert(pseudoRecu)
-                val l = ListeToDo(newListTitle)
-                profilListeToDo.listesToDo.add(l)
-                Log.i("testchoixlistact", profilListeToDo.toString())
-                Log.i("testchoixlistact", "Listes " + profilListeToDo.listesToDo.toString())
-            }
+        activityScope.launch(Dispatchers.Main) {
+            val newList = DataProvider.postList(pseudoRecu, newListTitle)
+            adapter.addList(newList)
         }
-
-        val newProfilJSON: String = gson.toJson(profilListeToDo)
-
-        // Edit shared preference (to put data)
-        val editor: SharedPreferences.Editor = prefsListes.edit()
-        editor.clear()
-        editor.putString(pseudoRecu, newProfilJSON)
-        editor.apply()
     }
 
-    //Gestion deboguage
-    private fun alert(s: String) {
-        val duration = Toast.LENGTH_SHORT
-        val toast = Toast.makeText(applicationContext, s, duration)
-        toast.show()
-    }
-
-    private fun newAdapter(): ListeAdapter {
-        return ListeAdapter(onListListener = this)
+    private fun newAdapter(): ListAdapter {
+        return ListAdapter(onListListener = this)
     }
 
     /**
      * Quand une liste est cliquée on change d'activité pout aller sur l'activité ShowListActivity
      *
-     * @param liste
+     * @param list
      */
-    override fun onListClicked(liste: ListeToDo) {
-        Log.d("ChoixListActivity", "onListClicked $liste")
-        Toast.makeText(this, liste.titreListeToDo, Toast.LENGTH_LONG).show()
+    override fun onListClicked(list: ListeToDo) {
+        Log.d("ChoixListActivity", "onListClicked $list")
+        Toast.makeText(this, list.label, Toast.LENGTH_LONG).show()
 
-        val titreListe = liste.titreListeToDo
+        val listLabel = list.label
         val bundleData = Bundle()
         bundleData.putString("pseudo", pseudoRecu)
-        bundleData.putString("titre", titreListe)
+        bundleData.putString("titre", listLabel)
 
         val afficherShowListActivity = Intent(this, ShowListActivity::class.java)
         afficherShowListActivity.putExtras(bundleData)
         startActivity(afficherShowListActivity)
+    }
+
+    override fun onDestroy() {
+        // Destroy all the Coroutines that have been launched
+        activityScope.cancel()
+        super.onDestroy()
     }
 }

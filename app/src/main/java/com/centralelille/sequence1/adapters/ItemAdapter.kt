@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.centralelille.sequence1.R
 import com.centralelille.sequence1.data.ItemToDo
 
-class TaskAdapter(private val onItemListener: OnItemListener) :
+class ItemAdapter(private val onItemListener: OnItemListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val dataSet: MutableList<ItemToDo> = mutableListOf()
@@ -34,6 +34,10 @@ class TaskAdapter(private val onItemListener: OnItemListener) :
         }
     }
 
+    fun addItem(newItem: Any) {
+
+    }
+
     inner class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val title: TextView = itemView.findViewById(R.id.title)
 
@@ -48,7 +52,7 @@ class TaskAdapter(private val onItemListener: OnItemListener) :
         }
 
         fun bind(item: ItemToDo) {
-            title.text = item.description
+            title.text = item.label
         }
     }
 
