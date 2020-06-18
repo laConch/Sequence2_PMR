@@ -6,11 +6,11 @@ package com.centralelille.sequence1.data
  * @property id
  * @property label
  */
-data class ListeToDo(var id: String, var label: String)
+data class ListToDo(var id: String, var label: String)
 
 /**
  * Represents a list of lists and is created according to the Json.
  *
- * @property listesToDo
+ * @property lists : List of ListToDO
  */
-data class ListesResponse(val listesToDo: MutableList<ListeToDo>)
+data class ListResponse(var lists: MutableList<ListToDo>)

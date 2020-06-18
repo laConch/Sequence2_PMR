@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.centralelille.sequence1.R
-import com.centralelille.sequence1.data.ListeToDo
+import com.centralelille.sequence1.data.ListToDo
 
 /**
  * Un adapter a besoin d'un ViewHolder
@@ -17,19 +17,19 @@ import com.centralelille.sequence1.data.ListeToDo
 class ListAdapter(private val onListListener: OnListListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val dataSet: MutableList<ListeToDo> = mutableListOf()
+    private val dataSet: MutableList<ListToDo> = mutableListOf()
 
     // 1. Appelée par le RecyclerView pour avoir une idée du nombre d'items à afficher
     override fun getItemCount(): Int = dataSet.size
 
-    fun showData(newDataSet: List<ListeToDo>) {
+    fun showData(newDataSet: List<ListToDo>) {
         dataSet.clear()
         dataSet.addAll(newDataSet)
         // Should refresh the view
         notifyDataSetChanged()
     }
 
-    fun addList(newList: ListeToDo) {
+    fun addList(newList: ListToDo) {
         dataSet.add(newList)
         notifyDataSetChanged()
     }
@@ -62,12 +62,12 @@ class ListAdapter(private val onListListener: OnListListener) :
 
         }
 
-        fun bind(list: ListeToDo) {
+        fun bind(list: ListToDo) {
             title.text = list.label
         }
     }
 
     interface OnListListener {
-        fun onListClicked(list: ListeToDo)
+        fun onListClicked(list: ListToDo)
     }
 }

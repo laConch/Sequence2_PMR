@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.centralelille.sequence1.adapters.ListAdapter
 import com.centralelille.sequence1.data.DataProvider
-import com.centralelille.sequence1.data.ListeToDo
+import com.centralelille.sequence1.data.ListToDo
 import kotlinx.coroutines.*
 
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -77,7 +77,7 @@ class ChoixListActivity : AppCompatActivity(), View.OnClickListener, ListAdapter
      *
      * @param list
      */
-    override fun onListClicked(list: ListeToDo) {
+    override fun onListClicked(list: ListToDo) {
         Log.d("ChoixListActivity", "onListClicked $list")
         Toast.makeText(this, list.label, Toast.LENGTH_LONG).show()
 
