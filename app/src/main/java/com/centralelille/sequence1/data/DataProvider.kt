@@ -49,6 +49,7 @@ object DataProvider {
      */
     suspend fun getListUser(pseudo: String): List<ListToDo> = withContext(Dispatchers.IO) {
         val json = getCall(pseudo, null)
+        Log.d("DataProvider", "getListUser $json")
         val listsResponse = gson.fromJson(json, ListResponse::class.java)
         Log.d("DataProvider", "getListUser $listsResponse")
         listsResponse.lists
@@ -82,7 +83,6 @@ object DataProvider {
             urlConnection.connect()
 
             reader = urlConnection.inputStream?.bufferedReader()
-            Log.d("DataProvider.getCall", "Response : ${reader?.readText()}")
             return reader?.readText()
         } finally {
             urlConnection?.disconnect()
