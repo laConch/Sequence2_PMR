@@ -17,15 +17,18 @@ import java.net.URL
  * And this method does not block the thread !
  */
 object DataProvider {
-
-    private const val POST_API_URL = "http://tomnab.fr/todo-api/users/2/lists"
+    
+    private const val POST_API_URL = "http://tomnab.fr/todo-api/"
+    private var HASH_CODE = "3f42b18b7f71498b166d1662848a5bec"
     private val gson = Gson()
 
     /**
      * To fetch the access token
      */
-    fun getAccessToken(onSuccess: (String) -> Unit) {
-        TODO()
+    suspend fun setAccessToken(pseudo: String, password: String) {
+        Log.d("DataProvider", "setAccessToken")
+        val json = getHashCall(pseudo, password)
+        HASH_CODE = gson.fromJson(json, AccessToken::class.java).hash
     }
 
     /**
@@ -36,26 +39,33 @@ object DataProvider {
      */
     suspend fun getItemList(pseudo: String, itemLabel: String): List<ItemToDo> =
         withContext(Dispatchers.IO) {
-            val json = getCall(pseudo, itemLabel)
+            Log.d("DataProvider", "getListUser")
+            val json = getCall("lists/469/items")
             val itemsResponse = gson.fromJson(json, ItemsResponse::class.java)
             itemsResponse.itemsToDo
         }
 
     /**
-     * Note : withContext gives the thread to use
+     * Return the lists of the user whose pseudo is given
      *
+     * Note : withContext gives the thread to use
      * @param pseudo
-     * @return
      */
     suspend fun getListUser(pseudo: String): List<ListToDo> = withContext(Dispatchers.IO) {
-        val json = getCall(pseudo, null)
-        Log.d("DataProvider", "getListUser $json")
+        Log.d("DataProvider", "getListUser")
+        val json = getCall("users/2/lists")
         val listsResponse = gson.fromJson(json, ListResponse::class.java)
-        Log.d("DataProvider", "getListUser $listsResponse")
         listsResponse.lists
     }
 
+    /**
+     * Create a new list
+     *
+     * @param pseudo
+     * @param listLabel
+     */
     suspend fun postList(pseudo: String, listLabel: String) = withContext(Dispatchers.IO) {
+        Log.d("DataProvider", "getListUser")
         val json = postCall(pseudo, listLabel, null)
         val newListe = gson.fromJson(json, ListToDo::class.java)
         newListe
@@ -68,18 +78,19 @@ object DataProvider {
             newItem
         }
 
-    private fun getCall(pseudo: String, itemLabel: String?): String? {
-        Log.d("DataProvider", "getCall $POST_API_URL")
+    /**
+     * Method used to call the API for hash codes
+     */
+    private fun getHashCall(pseudo: String, password: String): String? {
+        Log.d("DataProvider", "getHashCode")
         var urlConnection: HttpURLConnection? = null
         // Buffer used to read the API response
         var reader: BufferedReader? = null
 
         try {
-            // TODO("use pseudo or ID in URL")
-            urlConnection = URL(POST_API_URL).openConnection() as HttpURLConnection
-            urlConnection.requestMethod = "GET"
-            // Headers
-            urlConnection.setRequestProperty("hash", "3f42b18b7f71498b166d1662848a5bec")
+            urlConnection =
+                URL(POST_API_URL + "authenticate?user=$pseudo&password=$password").openConnection() as HttpURLConnection
+            urlConnection.requestMethod = "POST"
             urlConnection.connect()
 
             reader = urlConnection.inputStream?.bufferedReader()
@@ -90,17 +101,42 @@ object DataProvider {
         }
     }
 
-    private fun postCall(ID: String, newListName: String, itemLabel: String?): String? {
+    /**
+     * Method used to call the API for every GET request
+     */
+    private fun getCall(endOfUrl: String): String? {
+        Log.d("DataProvider", "getCall")
+        var urlConnection: HttpURLConnection? = null
+        // Buffer used to read the API response
+        var reader: BufferedReader? = null
+
+        try {
+            urlConnection = URL(POST_API_URL + endOfUrl).openConnection() as HttpURLConnection
+            urlConnection.requestMethod = "GET"
+            // Headers
+            urlConnection.setRequestProperty("hash", HASH_CODE)
+            urlConnection.connect()
+
+            reader = urlConnection.inputStream?.bufferedReader()
+            return reader?.readText()
+        } finally {
+            urlConnection?.disconnect()
+            reader?.close()
+        }
+    }
+
+    /**
+     * Method used to call the API for every POST request
+     */
+    private fun postCall(endOfUrl: String): String? {
         var urlConnection: HttpURLConnection? = null
         var reader: BufferedReader? = null
 
         try {
             // TODO("change URL")
-            urlConnection = URL(POST_API_URL).openConnection() as HttpURLConnection
+            urlConnection = URL(POST_API_URL + endOfUrl).openConnection() as HttpURLConnection
             urlConnection.requestMethod = "POST"
-            urlConnection.setRequestProperty("Content-Type", "application/json; utf-8")
-            urlConnection.setRequestProperty("Accept", "application/json")
-            urlConnection.setRequestProperty("hash", "3f42b18b7f71498b166d1662848a5bec")
+            urlConnection.setRequestProperty("hash", HASH_CODE)
             urlConnection.connect()
 
             reader = urlConnection.inputStream?.bufferedReader()

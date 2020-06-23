@@ -27,8 +27,10 @@ class DataProviderUnitTest {
     fun serialization_isCorrect() {
         var jsonString = gson.toJson(
             ListResponse(
-                version = "1", success = true, status = "200", lists = listOf(
+                lists = listOf(
                     ListToDo("1", "l1"), ListToDo("2", "l2")
+                    //version = "1", success = true, status = "200", lists = listOf(
+                    //    ListToDo("1", "l1"), ListToDo("2", "l2")
                 )
             )
         )
@@ -37,16 +39,22 @@ class DataProviderUnitTest {
             jsonString
         )
     }
+
     @Test
     fun deserialization_isCorrect() {
-        var listResponse = gson.fromJson("""{"version":1,"success":true,"status":200,"lists":[{"id":"1","label":"l1"},{"id":"2","label":"l2"}]}""", ListResponse::class.java)
-        assertEquals(ListResponse(
-            version = "1",
-            success = true,
-            status = "200",
-            lists = listOf(
-                ListToDo("1", "l1"), ListToDo("2", "l2")
-            )),
+        var listResponse = gson.fromJson(
+            """{"version":1,"success":true,"status":200,"lists":[{"id":"1","label":"l1"},{"id":"2","label":"l2"}]}""",
+            ListResponse::class.java
+        )
+        assertEquals(
+            ListResponse(
+                //version = "1",
+                //success = true,
+                //status = "200",
+                lists = listOf(
+                    ListToDo("1", "l1"), ListToDo("2", "l2")
+                )
+            ),
             listResponse
         )
     }

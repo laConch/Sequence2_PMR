@@ -14,8 +14,5 @@ data class ListToDo(var id: String, var label: String)
  * @property lists : List of ListToDO
  */
 data class ListResponse(
-    val version: String,
-    var success: Boolean,
-    var status: String,
     var lists: List<ListToDo>
 )
